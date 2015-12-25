@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace AutoClicker
 {
-    class ClickManager          //TODO Implement Threads
+    internal class ClickManager          
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
@@ -18,13 +18,10 @@ namespace AutoClicker
         private volatile bool _abort;
         private volatile bool _isRunning;
 
-        public bool IsRunning {
-            get {
-                return _isRunning;
-            }
-            set {
-                _isRunning = value;
-            }
+        public bool IsRunning
+        {
+            get { return _isRunning; }
+            set { _isRunning = value; }
         }
 
         public void Abort() {
@@ -32,11 +29,11 @@ namespace AutoClicker
         }
 
         public void Execute(Clickmode mode, int delay, int amount = 0) {
-           if(IsRunning || _abort)
+            if(IsRunning || _abort)
                 return;
 
             IsRunning = true;
-            
+
             if(mode == Clickmode.Sequence) {
                 Thread thread = new Thread(new ParameterizedThreadStart(ClickSequence));
                 thread.Start(new int[] { delay, amount });

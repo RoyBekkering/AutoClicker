@@ -3,22 +3,21 @@ using System.Windows.Forms;
 
 namespace AutoClicker
 {
-    class KeyListener
+    internal class KeyListener
     {
         public Keymode KMode { get; set; }
         public Clickmode CMode { get; set; }
         public int Delay { get; set; }
         public int Amount { get; set; }
-        
-        MainForm _parent;
 
-        ClickManager _clickManager;
-        GlobalKeyboardHook _keyHooks;
+        private MainForm _parent;
 
-        DateTime _lastClick;
+        private ClickManager _clickManager;
+        private GlobalKeyboardHook _keyHooks;
 
-        public KeyListener(MainForm parent)
-        {
+        private DateTime _lastClick;
+
+        public KeyListener(MainForm parent) {
             Delay = 500;
             Amount = 100;
             KMode = Keymode.Hold;
@@ -35,16 +34,26 @@ namespace AutoClicker
             _keyHooks.UnhookedKeyUp += Gkh_UnhookedKeyUp;
         }
 
+        /// <summary>
+        /// Called when an unhooked key is pressed. Used for listening for keybind
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Gkh_UnhookedKeyUp(object sender, KeyEventArgs e) {
             _keyHooks.HookedKeys.Clear();
             _keyHooks.HookedKeys.Add(e.KeyCode);
-            _keyHooks.UnhookedKeyUp -= Gkh_UnhookedKeyUp;
-            _parent.DisplayListenerKey(e.KeyCode.ToString());
+
+            _keyHooks.UnhookedKeyUp -= Gkh_UnhookedKeyUp;       //Unhook listener
+            _parent.DisplayListenerKey(e.KeyCode.ToString());   //Display on MainForm
         }
 
-        private void globalKeyHook_KeyDown(object sender, KeyEventArgs e)
-        {
-            if(CMode == Clickmode.Sequence) {       
+        /// <summary>
+        /// A hooked key is pressed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void globalKeyHook_KeyDown(object sender, KeyEventArgs e) {
+            if(CMode == Clickmode.Sequence) {
                 if(_clickManager.IsRunning) {
                     _clickManager.Abort();
                 }
@@ -52,13 +61,13 @@ namespace AutoClicker
                     _clickManager.Execute(Clickmode.Sequence, Delay, Amount);
                 }
             }
-            else if(CMode == Clickmode.Continuous) {  
+            else if(CMode == Clickmode.Continuous) {
                 if(KMode == Keymode.Hold) {
                     if(AllowedToClick()) {
-                        _clickManager.Execute(Clickmode.Sequence, 0, 1);   
+                        _clickManager.Execute(Clickmode.Sequence, 0, 1);
                     }
                 }
-                else if(KMode== Keymode.Toggle) {
+                else if(KMode == Keymode.Toggle) {
                     if(_clickManager.IsRunning) {
                         _clickManager.Abort();
                     }
@@ -69,6 +78,10 @@ namespace AutoClicker
             }
         }
 
+        /// <summary>
+        /// Used for holding sequence. Checks if the time since last click is greater than the delay.
+        /// </summary>
+        /// <returns></returns>
         private bool AllowedToClick() {
             if(_lastClick == null) {
                 _lastClick = DateTime.Now;
@@ -85,13 +98,13 @@ namespace AutoClicker
         }
     }
 
-    enum Clickmode
+    internal enum Clickmode
     {
         Sequence,
         Continuous
     }
 
-    enum Keymode
+    internal enum Keymode
     {
         Toggle,
         Hold

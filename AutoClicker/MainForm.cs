@@ -3,19 +3,25 @@ using System.Windows.Forms;
 
 namespace AutoClicker
 {
-    public partial class MainForm : Form    
+    public partial class MainForm : Form
     {
-        KeyListener listener;
+        private KeyListener listener;
 
         public MainForm() {
             InitializeComponent();
             listener = new KeyListener(this);
         }
 
+        /// <summary>
+        /// Called when the listener has a new keybind. Displays the key on the form.
+        /// </summary>
+        /// <param name="key"></param>
         public void DisplayListenerKey(string key) {
             textBox_Keybind.Text = key;
             button_Keybind_Set.Text = "Set";
         }
+
+        #region Events
 
         private void button_Keybind_Set_Click(object sender, System.EventArgs e) {
             button_Keybind_Set.Text = "Listening...";
@@ -63,7 +69,7 @@ namespace AutoClicker
                 listener.KMode = Keymode.Toggle;
             }
         }
-    }
 
-    
+        #endregion Events
+    }
 }
